@@ -1,0 +1,11 @@
+streamlit
+requests
+beautifulsoup4
+ddgs
+sentence-transformers
+transformers
+torch
+anthropic
+easyocr
+# Optional but recommended: proper Roman -> Devanagari transliteration (large download)
+# ai4bharat-transliteration
