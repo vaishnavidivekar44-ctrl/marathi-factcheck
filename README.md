@@ -32,7 +32,7 @@ input (text / link / image)
 
 The first full run downloads LaBSE (~1.8 GB) and the NLI model (~1 GB). This is normal.
 
-## Evaluation (this is your paper's proof)
+## Evaluation (pilot)
 
 The test set is 9 claims from published fact-checks, each written 3 ways
 (Devanagari, Roman, mixed), so 27 inputs. All claims in this pilot are false claims.
@@ -54,7 +54,7 @@ small (n=9 per cell), so treat these numbers as indicative only.
 - Add-on A: text-image inconsistency (image caption + entity comparison). OCR input already works.
 - Add-on B: explainability. The UI already shows normalization steps and evidence sentences.
 - Video input (Whisper speech-to-text) is deferred.
-- * Improve the verdict step (fact-check cue words or an LLM verifier).
+- Improve the verdict step (fact-check cue words or an LLM verifier).
 
 ## Known limits
 
