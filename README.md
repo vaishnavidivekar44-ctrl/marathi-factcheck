@@ -14,8 +14,8 @@ input (text / link / image)
 ```
 
 ## Setup from scratch
-
-1. Install Python 3.10 or newer from python.org (tick "Add to PATH" on Windows).
+1. Install Python 3.12 from python.org (tick "Add to PATH" on Windows).
+     Python   3.14 may not work with the ML libraries yet.
 2. Open a terminal in this folder and create a virtual environment:
    - Windows: `python -m venv venv` then `venv\Scripts\activate`
    - Mac/Linux: `python3 -m venv venv` then `source venv/bin/activate`
@@ -34,11 +34,18 @@ The first full run downloads LaBSE (~1.8 GB) and the NLI model (~1 GB). This is 
 
 ## Evaluation (this is your paper's proof)
 
-1. Put 100-200 real claims in `evaluation/test_claims.csv`, each written 3 ways
-   (devanagari, roman, mixed) with a label taken from a real published fact-check.
-2. `python evaluation/eval.py evaluation/test_claims.csv`
-3. It prints retrieval hit rate and accuracy for baseline RAG vs RAG + your rewriting
-   layer, per input form. Your result is the gap on roman and mixed input.
+The test set is 9 claims from published fact-checks, each written 3 ways
+(Devanagari, Roman, mixed), so 27 inputs. All claims in this pilot are false claims.
+
+Run it: python evaluation/eval.py evaluation/test_claims.csv
+
+It compares plain retrieval (baseline) with retrieval + the code-mixed rewriting layer,
+per input form. Results are in evaluation/results_summary.csv.
+
+Pilot findings: the rewriting layer improved evidence retrieval for mixed-language input
+and verdict accuracy for Roman input. The verdict step is still the weakest part: it can
+mark a false claim "Supported" when a fact-check article quotes the claim. The sample is
+small (n=9 per cell), so treat these numbers as indicative only.
 
 ## Roadmap
 
@@ -47,6 +54,7 @@ The first full run downloads LaBSE (~1.8 GB) and the NLI model (~1 GB). This is 
 - Add-on A: text-image inconsistency (image caption + entity comparison). OCR input already works.
 - Add-on B: explainability. The UI already shows normalization steps and evidence sentences.
 - Video input (Whisper speech-to-text) is deferred.
+- * Improve the verdict step (fact-check cue words or an LLM verifier).
 
 ## Known limits
 
