@@ -1,4 +1,5 @@
-# Marathi Live Fact-Checker
+# Marathi Live Fact-Checker (work in progress)
+**Status-** under active development. Results are from a small pilot and will change.
 
 Code-mixed Marathi query rewriting + live retrieval-augmented fact-checking. No training dataset:
 evidence is fetched live from the web for every claim.
