@@ -25,6 +25,15 @@ MIN_SIMILARITY = 0.30   # passages below this LaBSE score are dropped as garbage
 NLI_THRESHOLD = 0.60    # entailment / contradiction must beat this to give Supported / Refuted
 # Both numbers are first guesses: tune them on your test claims.
 
+# Fact-check cue rule (used when no LLM key is set). A page counts as a fact-check if its
+# domain is in this list or its text says "fact check"; if such a page is close enough to the
+# claim AND contains a debunking word ("false", "old video", "खोटा" ...), the verdict is Refuted.
+FACTCHECK_DOMAINS = [
+    "factcrescendo.com", "boomlive.in", "factly.in", "vishvasnews.com", "newschecker.in",
+    "altnews.in", "thequint.com", "factchecker.in", "afwa.in", "digitaleye.in",
+]
+FACTCHECK_MIN_SIMILARITY = 0.40
+
 MAX_PAGES = 6        # pages fetched per claim
 TOP_K_CHUNKS = 5     # evidence chunks passed to the verifier
 REQUEST_TIMEOUT = 8

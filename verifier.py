@@ -7,6 +7,7 @@ Verdicts: Supported / Refuted / Not enough evidence.
 """
 import json
 import re
+from urllib.parse import urlparse
 
 import config
 
@@ -32,6 +33,42 @@ def _llm_verify(claim: str, evidence: list) -> dict:
     data = json.loads(re.search(r"\{.*\}", raw, re.S).group(0))
     data["method"] = "llm"
     return data
+
+
+# Words that a fact-check page uses when it debunks a claim. English words are matched as
+# whole words; Marathi words as substrings (Devanagari has no reliable word boundary in regex).
+_NEG_EN = ["old video", "old clip", "old footage", "old photo", "old image", "is old", "falsely",
+           "false", "fake", "misleading", "hoax", "fabricated", "ai-generated", "ai generated",
+           "deepfake", "doctored", "not true", "no evidence", "baseless", "unrelated"]
+_NEG_MR = ["खोटा", "खोटे", "खोटी", "फेक", "जुना व्हिडिओ", "जुना व्हिडीओ", "जुनी", "दिशाभूल",
+           "अफवा", "असत्य", "बनावट", "चुकीचा", "चुकीचे", "निराधार"]
+_NEG_EN_RE = re.compile(r"(?<![a-z])(" + "|".join(re.escape(w) for w in _NEG_EN) + r")(?![a-z])")
+_FC_MARKERS = ["fact check", "fact-check", "factcheck", "फॅक्ट चेक", "फॅक्टचेक", "तथ्य पडताळणी"]
+
+
+def _is_factcheck_page(e: dict) -> bool:
+    host = urlparse(e.get("url", "")).netloc.lower()
+    if any(host == d or host.endswith("." + d) for d in config.FACTCHECK_DOMAINS):
+        return True
+    text = (e.get("title", "") + " " + e.get("url", "")).lower().replace("_", " ")
+    return any(m in text for m in _FC_MARKERS)
+
+
+def factcheck_signal(evidence: list):
+    """Index of the first evidence item that is a close fact-check page with a debunking cue,
+    plus the cue word. Returns (None, None) if there is none. Pure function, easy to test."""
+    for i, e in enumerate(evidence):
+        if e.get("score", 0) < config.FACTCHECK_MIN_SIMILARITY or not _is_factcheck_page(e):
+            continue
+        slug = urlparse(e.get("url", "")).path.replace("-", " ").replace("_", " ")
+        text = (e.get("title", "") + " " + e.get("chunk", "") + " " + slug).lower()
+        m = _NEG_EN_RE.search(text)
+        if m:
+            return i, m.group(1)
+        for w in _NEG_MR:
+            if w in text:
+                return i, w
+    return None, None
 
 
 _nli = None
@@ -80,4 +117,10 @@ def verify(claim: str, evidence: list) -> dict:
             return _llm_verify(claim, relevant)
         except Exception as exc:
             print("LLM verify failed, falling back to NLI:", exc)
+    idx, cue = factcheck_signal(relevant)
+    if idx is not None:
+        return {"verdict": "Refuted", "confidence": "medium", "key_evidence": [idx],
+                "explanation_english": (f'A fact-check page close to this claim contains the cue "{cue}". '
+                                        "This is a keyword rule, not a full reading of the article."),
+                "explanation_marathi": "", "method": "factcheck-cue"}
     return _nli_verify(claim, relevant)
