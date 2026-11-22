@@ -1,4 +1,4 @@
-# Marathi Live Fact-Checker (work in progress)
+# A Live Retrieval-Based Claim Verification System for Marathi with Support for Roman and Code-Mixed Input 
 **Status-** under active development. Results are from a small pilot and will change.
 
 Code-mixed Marathi query rewriting + live retrieval-augmented fact-checking. No training dataset:
